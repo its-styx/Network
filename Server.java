@@ -33,13 +33,17 @@ public class Server
 	
 	private void handleClient(Socket socket)
 	{
-		try
+		try (ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+			ObjectInputStream in = new ObjectInputStream(socket.getInputStream()))
 		{
-			
+			while(true)
+			{
+				Object obj = in.readObject();
+			}
 		}
-		catch
+		catch (IOException | ClassNotFoundException e)
 		{
-			
+			System.out.println("Client disconnected");
 		}
 	}
 	
