@@ -31,18 +31,52 @@ public class Client
 	
 	public Client()
 	{
+		JFrame frame = new JFrame("Client");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setSize(500,400);
 		
+		fileName = new JTextField(20);
+		results = new JTextArea();
+		results.setEditable(false);
+		JButton sendButton = new JButton("Send");
+		
+		JPanel panel = new JPanel();
+		panel.add(new JLabel("Enter file name: "));
+		panel.add(fileName);
+		panel.add(sendButton);
+		
+		frame.add(panel, BorderLayout.NORTH);
+		frame.add(new JScrollPane(results), BorderLayout.CENTER);
+		
+		sendButton.addActionListener(e -> handleFile());
+		frame.setVisible(true);
 		
 		//Try/Catch for server
 		try
 		{
 			socket = new Socket("localhost", 6969);
 			out = new ObjectOutputStream(socket.getOutputStream());
-			in = new ObjectInputStream(socket.getInputStrean());
+			in = new ObjectInputStream(socket.getInputStream());
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	private void handleFile()
+	{
+		String filename = fileName.getText();
+		results.setText("");
+		
+		try
+		{
+			
+		}
+		catch
+		{
+			
+		}
+
 	}
 }
