@@ -13,5 +13,15 @@ import java.net.Socket;
 
 public class Server
 {
-	
+	public Server()
+	{
+		try
+		{
+			
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
 }
