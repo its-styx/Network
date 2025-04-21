@@ -1,7 +1,7 @@
 /*
 	Christopher Pena
 	April 21, 2025
-	Purpose:
+	Purpose: Send matrices from client to server
 	Sources:
 			https://www.geeksforgeeks.org/java-util-timer-class-java/ for java.util.Timer
 */
@@ -27,6 +27,7 @@ import java.util.TimerTask;
 
 public class Client
 {
+	//Instantiate GUI and Timer Variables
 	private JTextField fileName;
 	private JTextArea results;
 	private JButton sendButton;
@@ -35,8 +36,10 @@ public class Client
 	private ObjectInputStream in;
 	private Timer connectionTimer;
 	
+	//Client Object
 	public Client()
 	{
+		//GUI
 		JFrame frame = new JFrame("Client");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(500,400);
@@ -58,11 +61,13 @@ public class Client
 		sendButton.addActionListener(e -> handleFile());
 		frame.setVisible(true);
 		
+		//Attempt Connection
 		attemptConnection();
 	}
 	
 	private void attemptConnection()
 	{
+		//Creates a timer
 		connectionTimer = new Timer();
 		connectionTimer.scheduleAtFixedRate(new TimerTask()
 		{
@@ -86,11 +91,12 @@ public class Client
 					results.append("Failed to connect to server. Retrying in 5 seconds.\n");
 				}
 			}
-		}, 0, 5000);
+		}, 0, 5000); //5 second timer
 	}
 	
 	private void startConnectionMonitor()
 	{
+		//Systematic check if still connected to server
 		new Thread(() -> {
 			try
 			{
@@ -113,6 +119,7 @@ public class Client
 	
 	private void handleFile()
 	{
+		// Handles file input and sends over to server
 		String filename = fileName.getText();
 		results.setText("");
 		

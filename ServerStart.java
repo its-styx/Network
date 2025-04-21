@@ -1,7 +1,7 @@
 /*
 	Christopher Pena
 	April 21, 2025
-	Purpose:
+	Purpose: Start Server
 	Sources:
 */
 

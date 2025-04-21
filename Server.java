@@ -1,7 +1,7 @@
 /*
 	Christopher Pena
 	April 21, 2025
-	Purpose:
+	Purpose: Recieve matrices from client to server
 	Sources:
 */
 
@@ -17,6 +17,7 @@ public class Server
 {
 	private volatile boolean running = true;
 	private ServerSocket serverSocket;
+	private ThreadOperation threadOperation = new ThreadOperation(4);
 	
 	public Server()
 	{
@@ -89,6 +90,14 @@ public class Server
 					printMatrix(matrix1);
 					System.out.println("Recieved matrix2: ");
 					printMatrix(matrix2);
+					
+					int[][] resultSum = new int[matrix1.length][matrix1[0].length];
+					int[][] resultDiff = new int[matrix1.length][matrix1[0].length];
+					
+					ThreadOperation topLeft = new ThreadOperation(matrix1, matrix2, resultSum, resultDiff, 0, 0, matrix1.length / 2, matrix1[0].length);
+					Threadedoperat
+					
+					
 				}
 			}
 		}
