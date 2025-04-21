@@ -69,9 +69,33 @@ public class Client
 		String filename = fileName.getText();
 		results.setText("");
 		
-		try
+		try (Scanner scanner = new Scanner(new File(filename)))
 		{
+			int rows = scanner.nextInt();
+			int cols = scanner.nextInt();
 			
+			int[][] matrix1 = new int[rows][cols];
+			int[][] matrix2 = new int[rows][cols];
+			
+			for (int i = 0; i < rows; i++)
+			{
+				for (int j = 0; j < cols; j++)
+				{
+					matrix1[i][j] = scanner.nextInt();
+				}
+			}
+			
+			for (int i = 0; i < rows; i++)
+			{
+				for (int j = 0; j < cols; j++)
+				{
+					matrix2[i][j] = scanner.nextInt();
+				}
+			}
+			
+			
+			
+			scanner.close();
 		}
 		catch
 		{
