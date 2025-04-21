@@ -28,4 +28,21 @@ public class Client
 	private Socket socket;
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
+	
+	public Client()
+	{
+		
+		
+		//Try/Catch for server
+		try
+		{
+			socket = new Socket("localhost", 6969);
+			out = new ObjectOutputStream(socket.getOutputStream());
+			in = new ObjectInputStream(socket.getInputStrean());
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
 }
