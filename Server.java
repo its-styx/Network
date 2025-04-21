@@ -39,6 +39,21 @@ public class Server
 			while(true)
 			{
 				Object obj = in.readObject();
+				if (obj instanceof String && obj.equals("TERMINATE"))
+				{
+					System.out.println("Client terminated connection");
+					break;
+				}
+				else if (obj instanceof int[][])
+				{
+					int[][] matrix1 = (int[][]) obj;
+					int[][] matrix2 = (int[][]) in.readObject();
+					
+					System.out.println("Recieved matrix1: ");
+					printMatrix(matrix1);
+					System.out.println("Recieved matrix2: ");
+					printMatrix(matrix2);
+				}
 			}
 		}
 		catch (IOException | ClassNotFoundException e)
@@ -51,7 +66,7 @@ public class Server
 	{
 		for (int[] row : matrix)
 		{
-			for (int value : row)
+			for (int val : row)
 			{
 				System.out.print(val + " ");
 			}
