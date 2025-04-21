@@ -3,6 +3,7 @@
 	April 21, 2025
 	Purpose:
 	Sources:
+			https://www.geeksforgeeks.org/java-util-timer-class-java/ for java.util.Timer
 */
 
 import javax.swing.JFrame;
@@ -21,14 +22,18 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Client
 {
 	private JTextField fileName;
 	private JTextArea results;
+	private JButton sendButton;
 	private Socket socket;
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
+	private Timer connectionTimer;
 	
 	public Client()
 	{
@@ -39,7 +44,8 @@ public class Client
 		fileName = new JTextField(20);
 		results = new JTextArea();
 		results.setEditable(false);
-		JButton sendButton = new JButton("Send");
+		sendButton = new JButton("Send");
+		sendButton.setEnabled(false);
 		
 		JPanel panel = new JPanel();
 		panel.add(new JLabel("Enter file name: "));
@@ -52,17 +58,57 @@ public class Client
 		sendButton.addActionListener(e -> handleFile());
 		frame.setVisible(true);
 		
-		//Try/Catch for server
-		try
+		attemptConnection();
+	}
+	
+	private void attemptConnection()
+	{
+		connectionTimer = new Timer();
+		connectionTimer.scheduleAtFixedRate(new TimerTask()
 		{
-			socket = new Socket("localhost", 6969);
-			out = new ObjectOutputStream(socket.getOutputStream());
-			in = new ObjectInputStream(socket.getInputStream());
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+			@Override
+			public void run()
+			{
+				//Try/Catch for server
+				try
+				{
+					socket = new Socket("localhost", 6969);
+					out = new ObjectOutputStream(socket.getOutputStream());
+					in = new ObjectInputStream(socket.getInputStream());
+					results.append("Connected to server\n");
+					sendButton.setEnabled(true);
+					connectionTimer.cancel();
+					startConnectionMonitor();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+					results.append("Failed to connect to server. Retrying in 5 seconds.\n");
+				}
+			}
+		}, 0, 5000);
+	}
+	
+	private void startConnectionMonitor()
+	{
+		new Thread(() -> {
+			try
+			{
+				while(true)
+				{
+					if (socket!= null && socket.getInputStream().read() == -1)
+					{
+						throw new IOException();
+					}
+				}
+			}
+			catch (IOException e)
+			{
+				results.append("Disconnected from server. Attempting to reconnect...\n");
+				sendButton.setEnabled(false);
+				attemptConnection();
+			}
+		}).start();
 	}
 	
 	private void handleFile()
