@@ -10,5 +10,20 @@ import java.util.concurrent.Executors;
 
 public class ThreadOperation
 {
+	private final ExecutorService executor;
 	
+	public ThreadOperation(int numberOfThreads)
+	{
+		executor = Executors.newFixedThreadPool(numberOfThreads);
+	}
+	
+	public void execute(Runnable task)
+	{
+		executor.execute(task);
+	}
+	
+	public void shutdown()
+	{
+		executor.shutdown();
+	}
 }
