@@ -4,3 +4,8 @@
 	Purpose:
 	Sources:
 */
+
+public class ThreadOperation
+{
+	
+}
