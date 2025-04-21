@@ -9,6 +9,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.JTextArea;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import java.awt.BorderLayout;
@@ -22,5 +23,9 @@ import java.util.Scanner;
 
 public class Client
 {
-	
+	private JTextField fileName;
+	private JTextArea results;
+	private Socket socket;
+	private ObjectOutputStream out;
+	private ObjectInputStream in;
 }
