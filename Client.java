@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Client
@@ -93,13 +94,16 @@ public class Client
 				}
 			}
 			
-			
+			out.writeObject(matrix1);
+			out.writeObject(matrix2);
+			out.flush();
 			
 			scanner.close();
+			results.append("Matrices sent\n");
 		}
-		catch
+		catch (IOException | NoSuchElementException e)
 		{
-			
+			results.append("Error: " + e.getMessage() + "\n");
 		}
 
 	}
