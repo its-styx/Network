@@ -12,12 +12,18 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class Server
 {
 	private volatile boolean running = true;
 	private ServerSocket serverSocket;
-	private ThreadOperation threadOperation = new ThreadOperation(4);
+	private final ExecutorService executor = Executors.newFixedThreadPool(4);
 	
 	public Server()
 	{
@@ -52,16 +58,40 @@ public class Server
 		try (ServerSocket serverSocket = new ServerSocket(6969))
 		{
 			System.out.println("Server started. Waiting for client...");
+			this.serverSocket = serverSocket;
 			
 			while(running)
 			{
-				Socket clientSocket = serverSocket.accept();
-				new Thread(() -> handleClient(clientSocket)).start();
+				Socket clientSocket = null;
+				try
+				{
+					clientSocket = serverSocket.accept();
+					final Socket socketThread = clientSocket;
+					new Thread(() -> handleClient(socketThread)).start();
+				}
+				catch (IOException e)
+				{
+					if (running)
+					{
+						e.printStackTrace();
+					}
+				}
 			}
 		}
 		catch (IOException e)
 		{
-			if (running)
+			e.printStackTrace();
+		}
+		finally
+		{
+			try
+			{
+				if (serverSocket != null && !serverSocket.isClosed())
+				{
+					serverSocket.close();
+				}
+			}
+			catch (IOException e)
 			{
 				e.printStackTrace();
 			}
@@ -73,13 +103,14 @@ public class Server
 		try (ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
 			ObjectInputStream in = new ObjectInputStream(socket.getInputStream()))
 		{
+			out.flush();
 			while(true)
 			{
 				Object obj = in.readObject();
 				if (obj instanceof String && obj.equals("TERMINATE"))
 				{
 					System.out.println("Client terminated connection");
-					break;
+					System.exit(0);
 				}
 				else if (obj instanceof int[][])
 				{
@@ -91,13 +122,10 @@ public class Server
 					System.out.println("Recieved matrix2: ");
 					printMatrix(matrix2);
 					
-					int[][] resultSum = new int[matrix1.length][matrix1[0].length];
-					int[][] resultDiff = new int[matrix1.length][matrix1[0].length];
 					
-					ThreadOperation topLeft = new ThreadOperation(matrix1, matrix2, resultSum, resultDiff, 0, 0, matrix1.length / 2, matrix1[0].length);
-					Threadedoperat
-					
-					
+					int[][] resultMatrix = sumMatrix(matrix1, matrix2);
+					out.writeObject(resultMatrix);
+					out.flush();
 				}
 			}
 		}
@@ -105,6 +133,50 @@ public class Server
 		{
 			System.out.println("Client disconnected");
 		}
+	}
+	
+	private int[][] sumMatrix(int[][] matrix1, int[][] matrix2)
+	{
+		int rows = matrix1.length;
+		int cols = matrix1[0].length;
+		int[][] result = new int[rows][cols];
+		
+		List<Future<Void>> futures = new ArrayList<>();
+		
+		for (int i = 0; i < 2; i++)
+		{
+			for (int j = 0; j < 2; j++)
+			{
+				final int startRow = i * (rows/2);
+				final int endRow = (i + 1) * (rows/2);
+				final int startCol = j * (cols/2);
+				final int endCol = (j + 1) * (cols/2);
+				
+				futures.add(executor.submit(() -> {
+					for (int r = startRow; r < endRow; r++)
+					{
+						for (int c = startCol; c < endCol; c++)
+						{
+							result[r][c] = matrix1[r][c] + matrix2[r][c];
+						}
+					}
+					return null;
+				}));
+			}
+		}
+		
+		futures.forEach(future -> {
+			try
+			{
+				future.get();
+			}
+			catch (Exception e)
+			{
+				throw new RuntimeException("Error during addition",e);
+			}
+		});
+		
+		return result;
 	}
 	
 	private void printMatrix(int[][] matrix)

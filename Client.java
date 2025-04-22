@@ -58,7 +58,20 @@ public class Client
 		frame.add(panel, BorderLayout.NORTH);
 		frame.add(new JScrollPane(results), BorderLayout.CENTER);
 		
-		sendButton.addActionListener(e -> handleFile());
+		sendButton.addActionListener(e -> {
+			handleFile();
+			try
+			{
+				out.writeObject("TERMINATE");
+				out.close();
+				in.close();
+				socket.close();
+			}
+			catch (IOException ex)
+			{
+				ex.printStackTrace();
+			}
+		});
 		frame.setVisible(true);
 		
 		//Attempt Connection
@@ -79,11 +92,11 @@ public class Client
 				{
 					socket = new Socket("localhost", 6969);
 					out = new ObjectOutputStream(socket.getOutputStream());
+					out.flush();
 					in = new ObjectInputStream(socket.getInputStream());
 					results.append("Connected to server\n");
 					sendButton.setEnabled(true);
 					connectionTimer.cancel();
-					startConnectionMonitor();
 				}
 				catch (IOException e)
 				{
@@ -92,29 +105,6 @@ public class Client
 				}
 			}
 		}, 0, 5000); //5 second timer
-	}
-	
-	private void startConnectionMonitor()
-	{
-		//Systematic check if still connected to server
-		new Thread(() -> {
-			try
-			{
-				while(true)
-				{
-					if (socket!= null && socket.getInputStream().read() == -1)
-					{
-						throw new IOException();
-					}
-				}
-			}
-			catch (IOException e)
-			{
-				results.append("Disconnected from server. Attempting to reconnect...\n");
-				sendButton.setEnabled(false);
-				attemptConnection();
-			}
-		}).start();
 	}
 	
 	private void handleFile()
@@ -150,14 +140,23 @@ public class Client
 			out.writeObject(matrix1);
 			out.writeObject(matrix2);
 			out.flush();
-			
-			scanner.close();
 			results.append("Matrices sent\n");
+			
+			int[][] resultMatrix = (int[][]) in.readObject();
+			results.append("Resulting Matrix:\n");
+			for (int[] row : resultMatrix)
+			{
+				for (int val : row)
+				{
+					results.append(val + " ");
+				}
+				results.append("\n");
+			}
+			out.flush();
 		}
-		catch (IOException | NoSuchElementException e)
+		catch (IOException | NoSuchElementException | ClassNotFoundException e)
 		{
 			results.append("Error: " + e.getMessage() + "\n");
 		}
-
 	}
 }
