@@ -21,7 +21,7 @@ import java.util.concurrent.Future;
 
 public class Server
 {
-	private volatile boolean running = true;
+	private volatile boolean running = true; //Volatile runnability
 	private ServerSocket serverSocket;
 	private final ExecutorService executor = Executors.newFixedThreadPool(4);
 	
@@ -30,6 +30,7 @@ public class Server
 		Thread serverThread = new Thread(this::runServer);
 		serverThread.start();
 		
+		//To close the server without client sending the file
 		try (BufferedReader console = new BufferedReader(new InputStreamReader(System.in)))
 		{
 			String command;
@@ -65,6 +66,7 @@ public class Server
 				Socket clientSocket = null;
 				try
 				{
+					// Just learned about lambda referencing exceptions. This sucked to figure out
 					clientSocket = serverSocket.accept();
 					final Socket socketThread = clientSocket;
 					new Thread(() -> handleClient(socketThread)).start();
@@ -103,12 +105,14 @@ public class Server
 		try (ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
 			ObjectInputStream in = new ObjectInputStream(socket.getInputStream()))
 		{
+			//Had to place this here to fix bit corruption
 			out.flush();
 			while(true)
 			{
 				Object obj = in.readObject();
 				if (obj instanceof String && obj.equals("TERMINATE"))
 				{
+					//Exits after addition and send back
 					System.out.println("Client terminated connection");
 					System.exit(0);
 				}
@@ -141,6 +145,7 @@ public class Server
 		int cols = matrix1[0].length;
 		int[][] result = new int[rows][cols];
 		
+		//Learned about future from a handful of places. Definitely very useful
 		List<Future<Void>> futures = new ArrayList<>();
 		
 		for (int i = 0; i < 2; i++)
